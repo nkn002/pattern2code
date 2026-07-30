@@ -89,7 +89,7 @@ h2.sec{font-size:1.95rem;margin-bottom:.55rem;}
   border:1px solid var(--line);border-radius:999px;padding:.34em .95em;
   font-size:.79rem;color:var(--muted);background:#fff;margin-bottom:1.5rem;
 }
-.venue b{color:var(--ink);font-weight:680;letter-spacing:.01em;}
+.venue b{color:var(--ink);font-weight:680;letter-spacing:.01em;white-space:nowrap;flex:none;}
 h1.title{
   font-size:clamp(2.25rem,5.4vw,3.5rem);
   font-weight:720;letter-spacing:-.033em;line-height:1.06;margin-bottom:.5rem;
