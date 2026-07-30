@@ -221,6 +221,7 @@ figure.plain img{border:0;border-radius:0;}
 
 /* ---------- charts ---------- */
 .chartbox{background:#fff;border:1px solid var(--line);border-radius:12px;padding:1.5rem 1.6rem 1.3rem;}
+.knob-chart{margin:4px 0 30px;}
 .chart{display:block;width:100%;min-width:600px;height:auto;}
 .chart text{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;}
 .chart .sh{font-size:14.5px;font-weight:660;fill:var(--ink);letter-spacing:-.01em;}
