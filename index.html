@@ -4,179 +4,155 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pattern Over Pixels: Measuring Pattern Completion Bias in Multimodal Code Generation</title>
-<meta name="description" content="Pattern2Code: a benchmark measuring whether multimodal LLMs follow localized visual evidence or complete the repeated UI pattern in screenshot-to-code generation. ASE 2026.">
-<meta property="og:title" content="Pattern Over Pixels — Pattern Completion Bias in Multimodal Code Generation">
-<meta property="og:description" content="MLLMs default to the repeated 100% baseline 69.78% (cards) and 80.22% (text) of the time. ASE 2026.">
-<meta property="og:image" content="static/images/teaser.png">
-<meta name="twitter:card" content="summary_large_image">
+<meta name="description" content="Pattern2Code is a benchmark that measures whether multimodal LLMs follow localized visual evidence or complete the repeated UI pattern when generating front-end code from screenshots. ASE 2026.">
+<meta name="author" content="Khai-Nguyen Nguyen, Oscar Chaparro, Antonio Mastropaolo">
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Pattern Over Pixels — Pattern Completion Bias in Multimodal Code Generation">
+<meta property="og:description" content="Five frontier MLLMs default to the repeated 100% baseline on 69.78% (card width) and 80.22% (font size) of perturbed elements. ASE 2026.">
+<meta property="og:image" content="https://nkn002.github.io/pattern2code/static/images/teaser.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Pattern Over Pixels — ASE 2026">
+<meta name="twitter:description" content="Do multimodal LLMs write the code that matches the pixels, or the code that matches the pattern?">
+<meta name="twitter:image" content="https://nkn002.github.io/pattern2code/static/images/teaser.png">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f1115'/%3E%3Crect x='6' y='7' width='13' height='4' rx='1.4' fill='%23f2f3f7'/%3E%3Crect x='6' y='14' width='13' height='4' rx='1.4' fill='%23f2f3f7'/%3E%3Crect x='6' y='21' width='20' height='4' rx='1.4' fill='%23ff6b5e'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="static/css/index.css">
 </head>
 <body>
 
-<!-- ============ HERO ============ -->
-<section class="hero">
-  <div class="hero-body">
-    <div class="container is-max-desktop">
-      <div class="columns is-centered">
-        <div class="column has-text-centered">
-          <h1 class="title is-1 publication-title">
-            <span class="pattern-icon">🧩</span> Pattern Over Pixels
-          </h1>
-          <h2 class="subtitle is-4 publication-subtitle">
-            Measuring Pattern Completion Bias in Multimodal Code Generation
-          </h2>
+<!-- ===================== NAV ===================== -->
+<nav class="nav" id="nav">
+  <div class="nav-in">
+    <a class="nav-brand" href="#top">Pattern Over Pixels</a>
+    <div class="nav-links">
+      <a href="#abstract">Abstract</a>
+      <a href="#benchmark">Benchmark</a>
+      <a href="#results">Results</a>
+      <a href="#why">Failure Modes</a>
+      <a href="#try">Try It</a>
+      <a href="#bibtex">BibTeX</a>
+    </div>
+  </div>
+</nav>
 
-          <div class="is-size-5 publication-authors">
-            <span class="author-block"><a href="https://nkn002.github.io/" target="_blank">Khai-Nguyen Nguyen</a>,</span>
-            <span class="author-block"><a href="https://ojcchar.github.io/" target="_blank">Oscar Chaparro</a>,</span>
-            <span class="author-block"><a href="https://antoniomastropaolo.io/" target="_blank">Antonio Mastropaolo</a></span>
-          </div>
-          <div class="is-size-6 publication-authors">
-            <span class="author-block">William &amp; Mary</span>
-          </div>
-          <div class="is-size-6 publication-venue">
-            <span class="venue-badge">ASE 2026</span>
-            <span class="venue-text">41st IEEE/ACM International Conference on Automated Software Engineering</span>
-          </div>
+<!-- ===================== HERO ===================== -->
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="venue"><b>ASE 2026</b> <span>41st IEEE/ACM Int'l Conf. on Automated Software Engineering</span></div>
 
-          <div class="publication-links">
-            <span class="link-block">
-              <a href="#" class="external-link button is-normal is-rounded is-dark">
-                <span class="icon"><i class="fas fa-file-pdf"></i></span><span>Paper</span>
-              </a>
-            </span>
-            <span class="link-block">
-              <a href="https://doi.org/10.5281/zenodo.19341953" target="_blank" class="external-link button is-normal is-rounded is-dark">
-                <span class="icon"><i class="ai ai-doi"></i></span><span>Artifact (Zenodo)</span>
-              </a>
-            </span>
-            <span class="link-block">
-              <a href="https://doi.org/10.5281/zenodo.19341953" target="_blank" class="external-link button is-normal is-rounded is-dark">
-                <span class="icon"><i class="fab fa-github"></i></span><span>Code</span>
-              </a>
-            </span>
-            <span class="link-block">
-              <a href="https://huggingface.co/datasets/knguyennguyen/pattern2code" target="_blank" class="external-link button is-normal is-rounded is-dark">
-                <span class="icon">🤗</span><span>Dataset</span>
-              </a>
-            </span>
-            <span class="link-block">
-              <a href="#gallery" class="external-link button is-normal is-rounded is-primary">
-                <span class="icon"><i class="fas fa-vial"></i></span><span>Test It Yourself</span>
-              </a>
-            </span>
-          </div>
+    <h1 class="title">
+      Pattern Over Pixels
+      <span class="thin">Measuring Pattern Completion Bias in Multimodal Code Generation</span>
+    </h1>
 
-          <div class="related-banner">
-            <span>Related:</span>
-            <a href="https://vlmsarebiased.github.io/" target="_blank">VLMs Are Biased</a> ·
-            <a href="https://vlmsareblind.github.io/" target="_blank">VLMs Are Blind</a>
-          </div>
-        </div>
+    <p class="authors">
+      <a href="https://nkn002.github.io/" target="_blank" rel="noopener">Khai-Nguyen Nguyen</a>,
+      <a href="https://ojcchar.github.io/" target="_blank" rel="noopener">Oscar Chaparro</a>,
+      <a href="https://antoniomastropaolo.io/" target="_blank" rel="noopener">Antonio Mastropaolo</a>
+    </p>
+    <p class="affil">William &amp; Mary</p>
+
+    <div class="links">
+      <!-- PAPER LINK: when the preprint is online, restore a button here:
+           <a class="btn" href="ARXIV_URL" target="_blank" rel="noopener">… Paper</a> -->
+      <a class="btn" href="https://doi.org/10.5281/zenodo.19341953" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
+        Code &amp; Artifact
+      </a>
+      <a class="btn ghost" href="https://huggingface.co/datasets/knguyennguyen/pattern2code" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>
+        Dataset
+      </a>
+      <a class="btn ghost" href="#try">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6.2L4.8 18a2.2 2.2 0 0 0 1.9 3.3h10.6A2.2 2.2 0 0 0 19.2 18L14 9.2V3"/></svg>
+        Try It Yourself
+      </a>
+    </div>
+    <p class="links-note">Camera-ready PDF will be linked here after publication.</p>
+
+    <div class="headline">
+      <div>
+        <div class="n c">69.78%</div>
+        <div class="l">mean bias rate<br>card <code>width</code> patterns</div>
+      </div>
+      <div>
+        <div class="n t">80.22%</div>
+        <div class="l">mean bias rate<br>text <code>font-size</code> patterns</div>
+      </div>
+      <div>
+        <div class="n">5 / 5</div>
+        <div class="l">frontier MLLMs affected<br>across 1,440 screenshots</div>
       </div>
     </div>
   </div>
+</header>
+
+<!-- ===================== TEASER ===================== -->
+<section style="padding-top:26px;">
+  <div class="wrap">
+    <figure class="fig-narrow">
+      <img src="static/images/teaser.png" alt="A model computes the correct card width of 120%, then discards its own answer to match the repeated pattern.">
+      <figcaption class="cap">
+        <b>Pattern-completion bias in action.</b> One post card has <code>width:__</code> while all its siblings are
+        <code>width:100%</code>. <b>Sonnet&#8209;4.6</b> observes that the card extends past its container, computes the
+        right ratio (&asymp;118% &rarr; <code>120%</code>) &mdash; then discards its own calculation to <i>&ldquo;match
+        the others.&rdquo;</i>
+      </figcaption>
+    </figure>
+  </div>
 </section>
 
-<!-- ============ TEASER ============ -->
-<section class="section teaser-section">
-  <div class="container is-max-desktop">
-    <figure class="image">
-      <img src="static/images/teaser.png" alt="A model computes the correct card width of 120%, then discards its own answer to match the repeated pattern.">
-    </figure>
-    <p class="caption">
-      <b>Pattern-completion bias in action.</b> Given a screenshot and a masked HTML snippet where one post card has
-      <code>width:__</code> and all others <code>width:100%</code>, <b>Sonnet-4.6</b> observes that the card extends beyond
-      its container, computes the correct ratio (≈118% → <code>120%</code>) — then discards its own calculation
-      to <i>"match the others."</i>
+<!-- ===================== ABSTRACT ===================== -->
+<section class="alt" id="abstract">
+  <div class="wrap measure">
+    <p class="eyebrow">Abstract</p>
+    <h2 class="sec" style="margin-bottom:1.4rem;">Repeated UI patterns override what the model sees</h2>
+    <p>
+      Multimodal large language models (MLLMs) are increasingly used to translate webpage screenshots into front-end
+      code, but repeated UI patterns may sway them toward visually incorrect yet pattern-consistent outputs. We test
+      how repeated webpage patterns hurt MLLM accuracy on an objective screenshot-to-code fill-in-the-blank task. We
+      introduce the first benchmark for <i>visual pattern-completion bias</i>, where one localized element in a repeated
+      UI pattern is perturbed and the model must recover the masked width or font-size value from the screenshot and
+      HTML context. Starting from 30 webpages curated from <span class="sc">Design2Code</span>, we build 1,440
+      evaluated screenshots spanning structural card and text-style patterns under standard and noise-overlaid
+      conditions. We evaluate five frontier MLLMs and find that all are strongly biased toward the repeated baseline.
+      Mean bias rate reaches 69.78% on card-width perturbations and 80.22% on text font-size perturbations, while mean
+      accuracy is only 21.17% and 7.89%, respectively. Reasoning analysis shows that greater reasoning effort
+      correlates with lower bias, yet qualitative evidence reveals that models can identify the anomalous element and
+      still override it with the pattern-consistent answer.
     </p>
   </div>
 </section>
 
-<!-- ============ TL;DR ============ -->
-<section class="section">
-  <div class="container is-max-desktop">
-    <div class="tldr-box">
-      <h2 class="title is-4">TL;DR</h2>
-      <p>
-        When a webpage has a <b>repeated UI pattern</b> and exactly one element deviates from it, multimodal LLMs
-        tend to write the <b>pattern-consistent</b> code rather than the code that matches the pixels.
-        Across 1,440 screenshots and 5 frontier models, the mean bias rate is
-        <b class="hl">69.78%</b> on card-width perturbations and <b class="hl">80.22%</b> on text font-size perturbations.
-        The subtler the deviation, the stronger the bias.
-      </p>
-    </div>
-  </div>
-</section>
-
-<!-- ============ ABSTRACT ============ -->
-<section class="section">
-  <div class="container is-max-desktop">
-    <h2 class="title is-3 has-text-centered">Abstract</h2>
-    <div class="content has-text-justified">
-      <p>
-        Multimodal large language models (MLLMs) are increasingly used to translate webpage screenshots into
-        front-end code, but repeated UI patterns may sway them toward visually incorrect yet pattern-consistent
-        outputs. We test how repeated webpage patterns hurt MLLM accuracy on an objective screenshot-to-code
-        fill-in-the-blank task. We introduce the first benchmark for <i>visual pattern-completion bias</i>, where one
-        localized element in a repeated UI pattern is perturbed and the model must recover the masked width or
-        font-size value from the screenshot and HTML context. Starting from 30 webpages curated from
-        <span class="sc">Design2Code</span>, we build 1,440 evaluated screenshots spanning structural card and
-        text-style patterns under standard and noise-overlaid conditions. We evaluate five frontier MLLMs and find
-        that all are strongly biased toward the repeated baseline. Mean bias rate reaches 69.78% on card-width
-        perturbations and 80.22% on text font-size perturbations, while mean accuracy is only 21.17% and 7.89%,
-        respectively. Reasoning analysis shows that greater reasoning effort correlates with lower bias, yet
-        qualitative evidence reveals that models can identify the anomalous element and still override it with the
-        pattern-consistent answer.
-      </p>
-    </div>
-  </div>
-</section>
-
-<!-- ============ THE PROBLEM ============ -->
-<section class="section section-alt">
-  <div class="container is-max-desktop">
-    <h2 class="title is-3 has-text-centered">The Problem: Plausible Code That Ignores the Pixels</h2>
-    <div class="content has-text-justified">
+<!-- ===================== PROBLEM ===================== -->
+<section>
+  <div class="wrap">
+    <div class="measure">
+      <p class="eyebrow">Motivation</p>
+      <h2 class="sec">Plausible code that ignores the pixels</h2>
       <p>
         Screenshot-to-code benchmarks mostly measure <b>page-level</b> fidelity: does the output look like the input?
-        But a model can produce globally plausible HTML/CSS while silently <b>normalizing away</b> a small,
-        intentional local deviation — a card that is deliberately wider, a nav item deliberately larger.
+        But a model can produce globally plausible HTML/CSS while silently <b>normalizing away</b> a small, intentional
+        local deviation &mdash; a card that is deliberately wider, a nav item deliberately larger.
       </p>
       <p>
-        These are exactly the errors that matter in front-end work: the output looks broadly correct, so the mistake
+        These are exactly the errors that matter in front-end work. The output looks broadly correct, so the mistake
         survives review, yet the generated code fails to preserve the precise design detail the developer intended.
       </p>
     </div>
-
-    <div class="columns is-centered mt-5">
-      <div class="column is-10">
-        <div class="concept-card">
-          <div class="concept-row">
-            <div class="mini-card">Title<hr><span>width: 100%</span></div>
-            <div class="mini-card">Title<hr><span>width: 100%</span></div>
-            <div class="mini-card">Title<hr><span>width: 100%</span></div>
-            <div class="mini-card is-odd">Title<hr><span class="odd-val">width: 120%</span></div>
-          </div>
-          <p class="concept-caption">
-            <span class="gt">Ground truth: <code>120%</code></span>
-            <span class="pred">Model predicts: <code>100%</code> ✗</span>
-          </p>
-        </div>
-      </div>
-    </div>
   </div>
 </section>
 
-<!-- ============ BENCHMARK ============ -->
-<section class="section">
-  <div class="container is-max-desktop">
-    <h2 class="title is-3 has-text-centered">The <span class="sc">Pattern2Code</span> Benchmark</h2>
-    <div class="content has-text-justified">
+<!-- ===================== BENCHMARK ===================== -->
+<section class="alt" id="benchmark">
+  <div class="wrap">
+    <div class="measure">
+      <p class="eyebrow">The benchmark</p>
+      <h2 class="sec"><span class="sc">Pattern2Code</span></h2>
       <p>
         We start from 484 <span class="sc">Design2Code</span> webpages and keep the 30 with clear repeated UI
         structures. From each page we extract one <b>card pattern</b> and one <b>text pattern</b>, normalize every
@@ -184,324 +160,400 @@
       </p>
     </div>
 
-    <figure class="image mt-4">
-      <img src="static/images/pipeline.png" alt="Pattern2Code construction pipeline">
+    <figure class="plain" style="margin-top:2.2rem;">
+      <img src="static/images/pipeline.png" alt="Pattern2Code construction pipeline: 484 webpages filtered to 30, one element perturbed across three positions and four magnitudes, rendered under two image conditions.">
+      <figcaption class="cap center">
+        <b>Benchmark construction.</b> From 484 webpages we retain 30 with repeated UI structures, perturb one element
+        per pattern across three positions and four magnitudes, and render each under standard and noise-overlaid
+        conditions &mdash; 1,440 screenshots per model.
+      </figcaption>
     </figure>
-    <p class="caption">
-      <b>Benchmark construction.</b> From 484 webpages we retain 30 with repeated UI structures, perturb one element
-      per pattern across three positions and four magnitudes, and render each under standard and noise-overlaid
-      conditions — 1,440 screenshots per model.
-    </p>
 
-    <div class="columns is-centered mt-5 stat-row">
-      <div class="column"><div class="stat"><div class="stat-num">30</div><div class="stat-lbl">real webpages</div></div></div>
-      <div class="column"><div class="stat"><div class="stat-num">720</div><div class="stat-lbl">masked instances</div></div></div>
-      <div class="column"><div class="stat"><div class="stat-num">1,440</div><div class="stat-lbl">screenshots / model</div></div></div>
-      <div class="column"><div class="stat"><div class="stat-num">5</div><div class="stat-lbl">frontier MLLMs</div></div></div>
+    <div class="headline" style="margin-top:2.4rem;grid-template-columns:repeat(4,1fr);">
+      <div><div class="n">30</div><div class="l">real webpages</div></div>
+      <div><div class="n">720</div><div class="l">masked instances</div></div>
+      <div><div class="n">1,440</div><div class="l">screenshots / model</div></div>
+      <div><div class="n">5</div><div class="l">frontier MLLMs</div></div>
     </div>
 
-    <div class="task-box mt-6">
-      <h3 class="title is-5">The task</h3>
-      <p>The model sees a rendered screenshot <b>and</b> the element's HTML with the target value masked:</p>
-      <pre class="prompt-block">You are doing a visual code fill-in-the-blank task. Given the webpage
+    <div class="panelbox" style="margin-top:1.6rem;">
+      <div class="box-head"><h3>The task</h3></div>
+      <p style="font-size:.93rem;">The model sees a rendered screenshot <b>and</b> the element's HTML with the target value masked:</p>
+      <pre class="codebox">You are doing a visual code fill-in-the-blank task. Given the webpage
 screenshot and HTML snippet below, fill the blank token __ with ONLY the
 missing CSS/HTML value. The goal is to predict the masked value to recreate
 the {pattern} in the webpage design. Return the final answer in JSON format:
-{"answer":"&lt;value&gt;"}. The blank must be a percentage value divisible by 10.</pre>
-      <div class="outcome-legend">
-        <span class="oc oc-correct"><b>Correct</b> — the true perturbed value</span>
-        <span class="oc oc-bias"><b>Bias-aligned</b> — the repeated baseline <code>100%</code></span>
-        <span class="oc oc-other"><b>Other error</b> — neither</span>
+<span class="s">{"answer":"&lt;value&gt;"}</span>. The blank must be a percentage value divisible by 10.</pre>
+      <div class="legend">
+        <span class="pill ok"><b>Correct</b> &mdash; the true perturbed value</span>
+        <span class="pill bias"><b>Bias-aligned</b> &mdash; the repeated baseline <code>100%</code></span>
+        <span class="pill other"><b>Other error</b> &mdash; neither</span>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============ MAIN RESULTS ============ -->
-<section class="section section-alt">
-  <div class="container is-max-desktop">
-    <h2 class="title is-3 has-text-centered">All Five Models Default to the Pattern</h2>
-    <p class="has-text-centered mb-5 subtle">
-      Accuracy / Bias / Other Error (%) under the standard image condition.
-    </p>
+<!-- ===================== RESULTS ===================== -->
+<section id="results">
+  <div class="wrap">
+    <div class="measure center">
+      <p class="eyebrow">Main result</p>
+      <h2 class="sec">All five models default to the pattern</h2>
+      <p class="sec-sub">Accuracy / Bias / Other Error (%) under the standard image condition. Bars under the bias column show its magnitude.</p>
+    </div>
 
-    <div class="table-container">
-      <table class="table is-fullwidth results-table">
+    <div class="tscroll">
+      <table>
         <thead>
           <tr>
-            <th rowspan="2" class="model-col">Model</th>
-            <th colspan="3" class="cards-h">Card Patterns (width)</th>
-            <th colspan="3" class="texts-h">Text Patterns (font-size)</th>
+            <th rowspan="2" class="model">Model</th>
+            <th colspan="3" class="cards-h">Card patterns &mdash; <code>width</code></th>
+            <th colspan="3" class="texts-h">Text patterns &mdash; <code>font-size</code></th>
           </tr>
           <tr>
-            <th class="cards-c">Acc.</th><th class="cards-c">Bias</th><th class="cards-c">Other</th>
-            <th class="texts-c">Acc.</th><th class="texts-c">Bias</th><th class="texts-c">Other</th>
+            <th class="cards-h">Acc.</th><th class="cards-h">Bias</th><th class="cards-h">Other</th>
+            <th class="texts-h">Acc.</th><th class="texts-h">Bias</th><th class="texts-h">Other</th>
           </tr>
         </thead>
         <tbody>
-          <tr class="group-row"><td colspan="7"><i>Code-specialized models</i></td></tr>
+          <tr class="grp"><td colspan="7">Code-specialized</td></tr>
           <tr>
-            <td class="model-col">Codex-5.3</td>
-            <td class="cards-c best">68.61</td><td class="cards-c best">26.39</td><td class="cards-c">5.00</td>
-            <td class="texts-c best">13.89</td><td class="texts-c">70.56</td><td class="texts-c">15.56</td>
+            <td class="model">Codex-5.3</td>
+            <td class="cards-c best">68.61</td><td class="cards-c">26.39<span class="bar" style="--w:26.4%"></span></td><td class="cards-c">5.00</td>
+            <td class="texts-c best">13.89</td><td class="texts-c">70.56<span class="bar" style="--w:70.6%"></span></td><td class="texts-c">15.56</td>
           </tr>
           <tr>
-            <td class="model-col">Opus-4.6</td>
-            <td class="cards-c">6.39</td><td class="cards-c">87.78</td><td class="cards-c">5.83</td>
-            <td class="texts-c">5.56</td><td class="texts-c">88.06</td><td class="texts-c">6.39</td>
+            <td class="model">Opus-4.6</td>
+            <td class="cards-c">6.39</td><td class="cards-c">87.78<span class="bar" style="--w:87.8%"></span></td><td class="cards-c">5.83</td>
+            <td class="texts-c">5.56</td><td class="texts-c">88.06<span class="bar" style="--w:88.1%"></span></td><td class="texts-c">6.39</td>
           </tr>
-          <tr class="group-row"><td colspan="7"><i>General-purpose models</i></td></tr>
+          <tr class="grp"><td colspan="7">General-purpose</td></tr>
           <tr>
-            <td class="model-col">ChatGPT-5.3</td>
-            <td class="cards-c">8.33</td><td class="cards-c">69.44</td><td class="cards-c">22.22</td>
-            <td class="texts-c">10.28</td><td class="texts-c best">66.94</td><td class="texts-c">22.78</td>
-          </tr>
-          <tr>
-            <td class="model-col">Sonnet-4.6</td>
-            <td class="cards-c">8.06</td><td class="cards-c">83.33</td><td class="cards-c">8.61</td>
-            <td class="texts-c">8.89</td><td class="texts-c">79.44</td><td class="texts-c">11.67</td>
+            <td class="model">ChatGPT-5.3</td>
+            <td class="cards-c">8.33</td><td class="cards-c">69.44<span class="bar" style="--w:69.4%"></span></td><td class="cards-c">22.22</td>
+            <td class="texts-c">10.28</td><td class="texts-c best">66.94<span class="bar" style="--w:66.9%"></span></td><td class="texts-c">22.78</td>
           </tr>
           <tr>
-            <td class="model-col">Flash-3.0</td>
-            <td class="cards-c">14.44</td><td class="cards-c">81.94</td><td class="cards-c">3.61</td>
-            <td class="texts-c">0.83</td><td class="texts-c worst">96.11</td><td class="texts-c">3.06</td>
+            <td class="model">Sonnet-4.6</td>
+            <td class="cards-c">8.06</td><td class="cards-c">83.33<span class="bar" style="--w:83.3%"></span></td><td class="cards-c">8.61</td>
+            <td class="texts-c">8.89</td><td class="texts-c">79.44<span class="bar" style="--w:79.4%"></span></td><td class="texts-c">11.67</td>
           </tr>
-          <tr class="mean-row">
-            <td class="model-col"><b>Mean</b></td>
-            <td class="cards-c"><b>21.17</b></td><td class="cards-c"><b>69.78</b></td><td class="cards-c"><b>9.06</b></td>
-            <td class="texts-c"><b>7.89</b></td><td class="texts-c"><b>80.22</b></td><td class="texts-c"><b>11.89</b></td>
+          <tr>
+            <td class="model">Flash-3.0</td>
+            <td class="cards-c">14.44</td><td class="cards-c">81.94<span class="bar" style="--w:81.9%"></span></td><td class="cards-c">3.61</td>
+            <td class="texts-c">0.83</td><td class="texts-c worst">96.11<span class="bar" style="--w:96.1%"></span></td><td class="texts-c">3.06</td>
+          </tr>
+          <tr class="mean">
+            <td class="model">Mean</td>
+            <td class="cards-c">21.17</td><td class="cards-c">69.78<span class="bar" style="--w:69.8%"></span></td><td class="cards-c">9.06</td>
+            <td class="texts-c">7.89</td><td class="texts-c">80.22<span class="bar" style="--w:80.2%"></span></td><td class="texts-c">11.89</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div class="callout mt-5">
+    <div class="callout">
       <b>Code specialization does not save you.</b> Codex-5.3 is by far the most visually grounded model
-      (68.61% on cards) — yet Opus-4.6, also code-specialized, is among the <i>most</i> biased
+      (68.61% on cards) &mdash; yet Opus-4.6, also code-specialized, is among the <i>most</i> biased
       (87.78% cards, 88.06% text). And every model collapses on fine-grained text perturbations.
     </div>
   </div>
 </section>
 
-<!-- ============ SALIENCY ============ -->
-<section class="section">
-  <div class="container is-max-desktop">
-    <h2 class="title is-3 has-text-centered">Bias Tracks Visual Saliency</h2>
-    <p class="has-text-centered mb-5 subtle">
-      Three independent knobs — noise, magnitude, position — all modulate the same variable:
-      how hard the deviation is to see.
-    </p>
+<!-- ===================== SALIENCY ===================== -->
+<section class="alt">
+  <div class="wrap">
+    <div class="measure center">
+      <p class="eyebrow">Analysis</p>
+      <h2 class="sec">Bias tracks visual saliency</h2>
+      <p class="sec-sub">Three independent knobs &mdash; noise, magnitude, position &mdash; all modulate the same underlying variable: how hard the deviation is to see.</p>
+    </div>
 
-    <div class="columns">
-      <div class="column">
-        <div class="finding-card">
-          <div class="finding-icon">🌫️</div>
-          <h3 class="title is-5">Noise amplifies bias</h3>
-          <p>Overlaying eight opaque rectangles raises mean card bias
-             <b>69.78% → 73.89%</b> (+4.11). Text bias is already near ceiling, so it moves less (+1.84).</p>
-        </div>
+    <div class="grid g3">
+      <div class="card">
+        <span class="mark">01</span>
+        <h3>Noise amplifies bias</h3>
+        <p>Overlaying eight opaque rectangles raises mean card bias <b>69.78% &rarr; 73.89%</b> (+4.11).
+           Text bias is already near ceiling, so it moves less (+1.84).</p>
       </div>
-      <div class="column">
-        <div class="finding-card">
-          <div class="finding-icon">🔍</div>
-          <h3 class="title is-5">Subtler perturbations are worse</h3>
-          <p>On cards, mean bias climbs <b>50.7% → 82.2%</b> as the perturbation shrinks from
-             <code>80%</code> to <code>110%</code>. Widening is harder to spot than shrinking.</p>
-        </div>
+      <div class="card">
+        <span class="mark">02</span>
+        <h3>Subtler perturbations are worse</h3>
+        <p>On cards, mean bias climbs <b>50.7% &rarr; 82.2%</b> as the perturbation shrinks from
+           <code>80%</code> to <code>110%</code>. Widening is harder to spot than shrinking.</p>
       </div>
-      <div class="column">
-        <div class="finding-card">
-          <div class="finding-icon">📍</div>
-          <h3 class="title is-5">Boundaries hide deviations</h3>
-          <p>Middle elements are flanked by pattern-consistent neighbors, making them most salient:
-             lowest bias <b>61.67%</b> vs. <b>73.83%</b> at both boundaries.</p>
-        </div>
+      <div class="card">
+        <span class="mark">03</span>
+        <h3>Boundaries hide deviations</h3>
+        <p>Middle elements are flanked by pattern-consistent neighbors, making them most salient:
+           lowest bias <b>61.67%</b> vs. <b>73.83%</b> at both boundaries.</p>
       </div>
     </div>
 
-    <h3 class="title is-5 mt-6 has-text-centered">Mean bias rate by perturbation magnitude</h3>
-    <div class="table-container">
-      <table class="table is-fullwidth results-table narrow">
-        <thead>
-          <tr><th class="model-col">Family</th><th>80%</th><th>90%</th><th>110%</th><th>120%</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="model-col">Cards (width)</td>
-            <td>50.7</td><td>69.3</td><td class="worst">82.2</td><td>76.9</td>
-          </tr>
-          <tr>
-            <td class="model-col">Text (font-size)</td>
-            <td>69.8</td><td class="worst">88.2</td><td>87.4</td><td>75.6</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="panelbox" style="margin-top:1.7rem;">
+      <div class="box-head"><h3>Mean bias rate by perturbation magnitude</h3></div>
+      <div class="tscroll">
+        <table>
+          <thead>
+            <tr><th class="model">Family</th><th>80%</th><th>90%</th><th>110%</th><th>120%</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="model">Cards (<code>width</code>)</td>
+              <td class="cards-c">50.7</td><td class="cards-c">69.3</td>
+              <td class="cards-c worst">82.2</td><td class="cards-c">76.9</td>
+            </tr>
+            <tr>
+              <td class="model">Text (<code>font-size</code>)</td>
+              <td class="texts-c">69.8</td><td class="texts-c worst">88.2</td>
+              <td class="texts-c">87.4</td><td class="texts-c">75.6</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="cap">The two magnitudes closest to the <code>100%</code> baseline are the hardest &mdash; bias peaks there.</p>
     </div>
-    <p class="caption">The two magnitudes closest to the <code>100%</code> baseline are the hardest — bias peaks there.</p>
   </div>
 </section>
 
-<!-- ============ FAILURE MODES ============ -->
-<section class="section section-alt">
-  <div class="container is-max-desktop">
-    <h2 class="title is-3 has-text-centered">Why Do They Fail? Three Mechanisms</h2>
-    <p class="has-text-centered mb-5 subtle">
-      We classified all <b>237</b> biased responses that contain a free-text rationale, using an LLM judge
-      (<code>gpt-5.4-mini</code>, temperature 0) validated against 30 hand-labeled traces (<b>29/30 agreement</b>).
-    </p>
+<!-- ===================== FAILURE MODES ===================== -->
+<section id="why">
+  <div class="wrap">
+    <div class="measure center">
+      <p class="eyebrow">Mechanism</p>
+      <h2 class="sec">Why do they fail?</h2>
+      <p class="sec-sub">
+        We classified all <b>237</b> biased responses that contain a free-text rationale using an LLM judge
+        (<code>gpt-5.4-mini</code>, temperature 0), validated against 30 blind hand-labeled traces
+        (<b>29/30 agreement</b>).
+      </p>
+    </div>
 
-    <div class="columns">
-      <div class="column">
-        <div class="mode-card mode-a">
-          <div class="mode-pct">26.2%</div>
-          <h3 class="title is-5">A · Code-anchored</h3>
-          <p>Reasons only from the HTML, never references the screenshot. The baseline answer is a
-             <i>default</i>, not a visual judgment.</p>
-          <div class="mode-quote">"All other boxes use <code>width:100%</code>, so the blank is 100%."</div>
-        </div>
+    <div class="grid g3">
+      <div class="mode a">
+        <div class="pct">26.2%</div>
+        <span class="tag">MODE A</span>
+        <h3>Code-anchored</h3>
+        <p>Reasons only from the HTML and never references the screenshot. The baseline answer is a
+           <i>default</i>, not a visual judgment.</p>
+        <p class="quote">&ldquo;All other boxes use <code>width:100%</code>, so the blank is 100%.&rdquo;</p>
       </div>
-      <div class="column">
-        <div class="mode-card mode-b">
-          <div class="mode-pct">59.1%</div>
-          <h3 class="title is-5">B · Perceived-consistent</h3>
-          <p>Looks at the screenshot but reports the element as <i>visually matching</i> its neighbors.
-             The deviation is in the pixels but never registers.</p>
-          <div class="mode-quote">"The three buttons appear the same width, so 100% to match others."</div>
-        </div>
+      <div class="mode b">
+        <div class="pct">59.1%</div>
+        <span class="tag">MODE B</span>
+        <h3>Perceived-consistent</h3>
+        <p>Looks at the screenshot but reports the element as <i>visually matching</i> its neighbors.
+           The deviation is in the pixels but never registers.</p>
+        <p class="quote">&ldquo;The three buttons appear the same width, so 100% to match others.&rdquo;</p>
       </div>
-      <div class="column">
-        <div class="mode-card mode-c">
-          <div class="mode-pct">14.8%</div>
-          <h3 class="title is-5">C · Observed-then-overrode</h3>
-          <p>Explicitly notes the element looks different — sometimes computing the right value —
-             then answers the baseline anyway.</p>
-          <div class="mode-quote">"The post extends beyond the container (~120%); 100% is most consistent."</div>
-        </div>
+      <div class="mode c">
+        <div class="pct">14.8%</div>
+        <span class="tag">MODE C</span>
+        <h3>Observed-then-overrode</h3>
+        <p>Explicitly notes that the element looks different &mdash; sometimes computing the right value &mdash;
+           then answers the baseline anyway.</p>
+        <p class="quote">&ldquo;The post extends beyond the container (~120%); 100% is most consistent.&rdquo;</p>
       </div>
     </div>
 
-    <div class="callout mt-5">
+    <div class="callout">
       <b>The bias is mostly perceptual, not deliberate.</b> In ~74% of verbalized biased responses the model
-      demonstrably engages the screenshot — it simply fails to register the deviation (B). The dramatic
-      "saw it and discarded it" override (C) is real, but rarer, and highly model-dependent
+      demonstrably engages the screenshot &mdash; it simply fails to register the deviation (mode B). The dramatic
+      &ldquo;saw it and discarded it&rdquo; override (mode C) is real, but rarer and highly model-dependent
       (45.5% for Opus-4.6 vs. 4.3% for Flash-3.0).
     </div>
   </div>
 </section>
 
-<!-- ============ QUALITATIVE ============ -->
-<section class="section">
-  <div class="container is-max-desktop">
-    <h2 class="title is-3 has-text-centered">Caught in the Act</h2>
-    <p class="has-text-centered mb-5 subtle">Models perceive the deviation, say so out loud, and override it anyway.</p>
+<!-- ===================== QUALITATIVE ===================== -->
+<section class="alt">
+  <div class="wrap">
+    <div class="measure center">
+      <p class="eyebrow">Qualitative evidence</p>
+      <h2 class="sec">Caught in the act</h2>
+      <p class="sec-sub">Models perceive the deviation, say so out loud, and override it anyway.</p>
+    </div>
 
-    <div class="columns">
-      <div class="column is-half">
-        <figure class="image qual-img"><img src="static/images/qual1.png" alt="Opus-4.6 self-talk-down example"></figure>
-        <div class="quote-box">
-          <p><i>"The Translators card appears to be <b>about 80% of the full width</b> compared to the other cards which
-          span 100%. […] However, examining more carefully […] It's most likely also <b>100% to match the consistent
-          layout</b> of all four cards."</i></p>
-          <p class="answer">Ground truth: <code>80%</code> · Answer: <code>100%</code> <span class="x">✗</span></p>
+    <div class="grid g2 qual">
+      <div>
+        <figure><img src="static/images/qual1.png" alt="Screenshot in which the Translators panel is rendered narrower than its sibling panels."></figure>
+        <div class="said">
+          <em>&ldquo;The Translators card appears to be <b>about 80% of the full width</b> compared to the other cards
+          which span 100%. [&hellip;] However, examining more carefully [&hellip;] It's most likely also
+          <b>100% to match the consistent layout</b> of all four cards.&rdquo;</em>
+          <div class="verdict">
+            <span class="gt">Ground truth <code>80%</code></span>
+            <span class="pr">Answered <code>100%</code></span>
+          </div>
         </div>
-        <p class="caption"><b>(a)</b> Opus-4.6 estimates the width correctly, then talks itself out of it.</p>
+        <p class="cap"><b>(a)</b> Opus-4.6 estimates the width correctly, then talks itself out of it.</p>
       </div>
-      <div class="column is-half">
-        <figure class="image qual-img"><img src="static/images/qual2.png" alt="Flash-3.0 despite-the-visual-rendering example"></figure>
-        <div class="quote-box">
-          <p><i>"The 'Message' field's input is <b>visibly narrower</b> than the input fields above it. […] it
-          <b>spans a significantly smaller portion</b> of the row […] <b>100% is the most consistent choice despite the
-          visual rendering</b> of the box inside."</i></p>
-          <p class="answer">Ground truth: <code>80%</code> · Answer: <code>100%</code> <span class="x">✗</span></p>
+      <div>
+        <figure><img src="static/images/qual2.png" alt="Screenshot in which the Message input field is rendered narrower than the fields above it."></figure>
+        <div class="said">
+          <em>&ldquo;The &lsquo;Message&rsquo; field's input is <b>visibly narrower</b> than the input fields above it.
+          [&hellip;] it <b>spans a significantly smaller portion</b> of the row [&hellip;] <b>100% is the most consistent
+          choice despite the visual rendering</b> of the box inside.&rdquo;</em>
+          <div class="verdict">
+            <span class="gt">Ground truth <code>80%</code></span>
+            <span class="pr">Answered <code>100%</code></span>
+          </div>
         </div>
-        <p class="caption"><b>(b)</b> Flash-3.0 names the deviation, then explicitly overrules the pixels.</p>
+        <p class="cap"><b>(b)</b> Flash-3.0 names the deviation, then explicitly overrules the pixels.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============ GALLERY ============ -->
-<section class="section section-alt" id="gallery">
-  <div class="container is-max-desktop">
-    <h2 class="title is-3 has-text-centered">Test It Yourself</h2>
-    <p class="has-text-centered mb-5 subtle">
-      Copy the prompt, drop in the screenshot, and see whether your model follows the pixels or the pattern.
-    </p>
-
-    <div class="tabs is-centered is-toggle is-small" id="gallery-tabs">
-      <ul>
-        <li class="is-active" data-tab="0"><a>Card · 120%</a></li>
-        <li data-tab="1"><a>Card · 80%</a></li>
-        <li data-tab="2"><a>Text · 120%</a></li>
-        <li data-tab="3"><a>Text · 80%</a></li>
-      </ul>
+<!-- ===================== TRY IT ===================== -->
+<section id="try">
+  <div class="wrap">
+    <div class="measure center">
+      <p class="eyebrow">Interactive</p>
+      <h2 class="sec">Try it yourself</h2>
+      <p class="sec-sub">
+        Each page below contains one element that deviates from its repeated pattern. Can you spot it before you
+        reveal it? Then copy the prompt and see whether your own model follows the pixels or the pattern.
+      </p>
     </div>
 
-    <div class="gallery-panel is-active" data-panel="0">
-      <figure class="image"><img src="static/images/ex_card_120.png" alt="card 120% example"></figure>
-      <p class="caption">One card is rendered at <code>width:120%</code>; all its siblings are <code>100%</code>.
-        <b>Ground truth: <code>120%</code></b></p>
-    </div>
-    <div class="gallery-panel" data-panel="1">
-      <figure class="image"><img src="static/images/ex_card_80.png" alt="card 80% example"></figure>
-      <p class="caption">One card is rendered at <code>width:80%</code>. <b>Ground truth: <code>80%</code></b></p>
-    </div>
-    <div class="gallery-panel" data-panel="2">
-      <figure class="image"><img src="static/images/ex_text_120.png" alt="text 120% example"></figure>
-      <p class="caption">One nav item is rendered at <code>font-size:120%</code>. <b>Ground truth: <code>120%</code></b></p>
-    </div>
-    <div class="gallery-panel" data-panel="3">
-      <figure class="image"><img src="static/images/ex_text_80.png" alt="text 80% example"></figure>
-      <p class="caption">One nav item is rendered at <code>font-size:80%</code>. <b>Ground truth: <code>80%</code></b></p>
+    <div class="tabs" role="tablist" id="tabs">
+      <button role="tab" aria-selected="true"  data-tab="0">Card &middot; 120%</button>
+      <button role="tab" aria-selected="false" data-tab="1">Card &middot; 80%</button>
+      <button role="tab" aria-selected="false" data-tab="2">Text &middot; 120%</button>
+      <button role="tab" aria-selected="false" data-tab="3">Text &middot; 80%</button>
     </div>
 
-    <div class="task-box mt-5">
-      <div class="prompt-head">
-        <h3 class="title is-6 mb-0">Prompt</h3>
-        <button class="button is-small is-rounded" id="copy-btn">
-          <span class="icon is-small"><i class="fas fa-copy"></i></span><span>Copy</span>
+    <!-- 0 : card 120 -->
+    <div class="panel on" data-panel="0">
+      <div class="browser">
+        <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="url">cards/standard/360_card-mid_w-120pct.png</span></div>
+        <div class="viewport"><div class="shot">
+          <img src="static/images/ex_card_120.png" alt="Forum thread in which one post block is rendered wider than the others.">
+          <span class="spot" style="left:1.8%;top:46.9%;width:98%;height:8.2%"></span>
+        </div>
+        </div>
+      </div>
+      <div class="gal-foot">
+        <span class="meta">One post block is rendered at <b>width: 120%</b>; every sibling is <code>100%</code>.</span>
+        <span class="answer">Ground truth <b>120%</b></span>
+        <button class="reveal-btn">Reveal the deviation</button>
+      </div>
+    </div>
+
+    <!-- 1 : card 80 -->
+    <div class="panel" data-panel="1">
+      <div class="browser">
+        <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="url">cards/standard/6998_card-mid_w-80pct.png</span></div>
+        <div class="viewport"><div class="shot">
+          <img src="static/images/ex_card_80.png" alt="Library record page in which one information panel is rendered narrower than the others.">
+          <span class="spot" style="left:4%;top:42.9%;width:36%;height:4.6%"></span>
+        </div>
+        </div>
+      </div>
+      <div class="gal-foot">
+        <span class="meta">One information panel is rendered at <b>width: 80%</b>; every sibling is <code>100%</code>.</span>
+        <span class="answer">Ground truth <b>80%</b></span>
+        <button class="reveal-btn">Reveal the deviation</button>
+      </div>
+    </div>
+
+    <!-- 2 : text 120 -->
+    <div class="panel" data-panel="2">
+      <div class="browser">
+        <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="url">texts/standard/60_navtext-first_fs-120pct.png</span></div>
+        <div class="viewport"><div class="shot">
+          <img src="static/images/ex_text_120.png" alt="Landing page whose first navigation item is rendered in a larger font than its siblings.">
+          <span class="spot" style="left:43.4%;top:12.4%;width:9.6%;height:4.2%"></span>
+        </div>
+        </div>
+      </div>
+      <div class="gal-foot">
+        <span class="meta">One nav item is rendered at <b>font-size: 120%</b>; every sibling is <code>100%</code>.</span>
+        <span class="answer">Ground truth <b>120%</b></span>
+        <button class="reveal-btn">Reveal the deviation</button>
+      </div>
+    </div>
+
+    <!-- 3 : text 80 -->
+    <div class="panel" data-panel="3">
+      <div class="browser">
+        <div class="chrome"><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+          <span class="url">texts/standard/360_navtext-mid_fs-80pct.png</span></div>
+        <div class="viewport"><div class="shot">
+          <img src="static/images/ex_text_80.png" alt="Forum page whose middle breadcrumb item is rendered in a smaller font than its siblings.">
+          <span class="spot" style="left:25.8%;top:3.4%;width:7.4%;height:2.6%"></span>
+        </div>
+        </div>
+      </div>
+      <div class="gal-foot">
+        <span class="meta">One breadcrumb item is rendered at <b>font-size: 80%</b>; every sibling is <code>100%</code>.</span>
+        <span class="answer">Ground truth <b>80%</b></span>
+        <button class="reveal-btn">Reveal the deviation</button>
+      </div>
+    </div>
+
+    <div class="panelbox" style="margin-top:1.6rem;">
+      <div class="box-head">
+        <h3>Prompt</h3>
+        <button class="copy" data-copy="#prompt-text">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span>Copy</span>
         </button>
       </div>
-      <pre class="prompt-block" id="prompt-text">You are doing a visual code fill-in-the-blank task. Given the webpage screenshot and HTML snippet below, fill the blank token __ with ONLY the missing CSS/HTML value. The goal is to predict the masked value to recreate the {pattern} in the webpage design. Return the final answer in JSON format: {"answer":"&lt;value&gt;"}. The blank must be a percentage value divisible by 10.</pre>
+      <pre class="codebox" id="prompt-text">You are doing a visual code fill-in-the-blank task. Given the webpage screenshot and HTML snippet below, fill the blank token __ with ONLY the missing CSS/HTML value. The goal is to predict the masked value to recreate the {pattern} in the webpage design. Return the final answer in JSON format: {"answer":"&lt;value&gt;"}. The blank must be a percentage value divisible by 10.</pre>
+      <p class="cap">
+        All 720 instances and 1,440 screenshots are on
+        <a href="https://huggingface.co/datasets/knguyennguyen/pattern2code" target="_blank" rel="noopener">Hugging Face</a>.
+      </p>
     </div>
   </div>
 </section>
 
-<!-- ============ TAKEAWAYS ============ -->
-<section class="section">
-  <div class="container is-max-desktop">
-    <h2 class="title is-3 has-text-centered">What This Means</h2>
-    <div class="columns">
-      <div class="column">
-        <div class="take-card">
-          <h3 class="title is-5">🎯 Trust coarse layout, verify fine styling</h3>
-          <p>Screenshot-to-code output can be trusted for broad structure, but <b>not</b> for the
-             fine-grained styling that matters in polished front-end work — spacing, sizing, hierarchy.</p>
-        </div>
+<!-- ===================== TAKEAWAYS ===================== -->
+<section class="alt">
+  <div class="wrap">
+    <div class="measure center">
+      <p class="eyebrow">Implications</p>
+      <h2 class="sec">What this means</h2>
+    </div>
+    <div class="grid g3">
+      <div class="card">
+        <span class="mark">&rarr;</span>
+        <h3>Trust coarse layout, verify fine styling</h3>
+        <p>Screenshot-to-code output can be trusted for broad structure, but <b>not</b> for the fine-grained styling
+           that matters in polished front-end work &mdash; spacing, sizing, hierarchy.</p>
       </div>
-      <div class="column">
-        <div class="take-card">
-          <h3 class="title is-5">📏 Page-level metrics hide this</h3>
-          <p>Because the failure restores a <i>plausible</i> value, outputs still score well on global
-             similarity metrics. Localized, controlled edits are needed to expose it.</p>
-        </div>
+      <div class="card">
+        <span class="mark">&rarr;</span>
+        <h3>Page-level metrics hide this</h3>
+        <p>Because the failure restores a <i>plausible</i> value, outputs still score well on global similarity
+           metrics. Localized, controlled edits are needed to expose it.</p>
       </div>
-      <div class="column">
-        <div class="take-card">
-          <h3 class="title is-5">🔧 Verification is cheap</h3>
-          <p>Re-render the generated code and compare the target element's computed CSS against the
-             screenshot. That single check catches the most egregious cases.</p>
-        </div>
+      <div class="card">
+        <span class="mark">&rarr;</span>
+        <h3>Verification is cheap</h3>
+        <p>Re-render the generated code and compare the target element's computed CSS against the screenshot. That
+           single check catches the most egregious cases.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============ BIBTEX ============ -->
-<section class="section section-alt" id="bibtex">
-  <div class="container is-max-desktop">
-    <h2 class="title is-3 has-text-centered">BibTeX</h2>
-    <pre class="bibtex-block">@inproceedings{nguyen2026pattern,
+<!-- ===================== BIBTEX ===================== -->
+<section id="bibtex">
+  <div class="wrap measure">
+    <div class="box-head">
+      <h2 class="sec" style="font-size:1.5rem;margin:0;">BibTeX</h2>
+      <button class="copy" data-copy="#bib">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span>Copy</span>
+      </button>
+    </div>
+    <pre class="codebox" id="bib">@inproceedings{nguyen2026pattern,
   title     = {Pattern Over Pixels: Measuring Pattern Completion Bias
                in Multimodal Code Generation},
   author    = {Nguyen, Khai-Nguyen and Chaparro, Oscar and Mastropaolo, Antonio},
@@ -512,18 +564,31 @@ the {pattern} in the webpage design. Return the final answer in JSON format:
   </div>
 </section>
 
-<!-- ============ FOOTER ============ -->
-<footer class="footer">
-  <div class="container is-max-desktop has-text-centered">
-    <p class="is-size-7">
-      The benchmark is built on webpages from the
-      <a href="https://github.com/NoviScl/Design2Code" target="_blank">Design2Code</a> dataset
-      (code: MIT; dataset: ODC-By, derived from C4). Code released under MIT; benchmark data under ODC-By.
-    </p>
-    <p class="is-size-7 mt-2">
-      Website template borrowed from <a href="https://nerfies.github.io/" target="_blank">Nerfies</a>,
-      used under a <a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">CC BY-SA 4.0</a> license.
-    </p>
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div class="wrap foot-grid">
+    <div>
+      <p>
+        <span class="sc">Pattern2Code</span> is built on webpages from the
+        <a href="https://github.com/NoviScl/Design2Code" target="_blank" rel="noopener">Design2Code</a> dataset
+        (code: MIT; data: ODC-By, derived from C4). Our code is released under MIT and the benchmark data under
+        ODC-By, with attribution. Copyright in the original website content remains with the respective site owners;
+        the material is shared for research and reproducibility purposes.
+      </p>
+      <p style="margin-top:.9rem;">
+        Page design by the authors; layout inspired by
+        <a href="https://nerfies.github.io/" target="_blank" rel="noopener">Nerfies</a>
+        (<a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>).
+      </p>
+    </div>
+    <div>
+      <h4>Related work</h4>
+      <ul>
+        <li><a href="https://vlmsarebiased.github.io/" target="_blank" rel="noopener">VLMs Are Biased</a></li>
+        <li><a href="https://vlmsareblind.github.io/" target="_blank" rel="noopener">VLMs Are Blind</a></li>
+        <li><a href="https://github.com/NoviScl/Design2Code" target="_blank" rel="noopener">Design2Code</a></li>
+      </ul>
+    </div>
   </div>
 </footer>
 
