@@ -185,14 +185,15 @@ figure.plain img{border:0;border-radius:0;}
 .split{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;}
 .split figure img{border:1px solid var(--line);}
 
-/* ---------- finding rows (text + demonstration) ---------- */
-.finding{
-  display:grid;grid-template-columns:.78fr 1.22fr;gap:36px;align-items:center;
-  padding:30px 0;border-top:1px solid var(--line);
-}
-.finding:first-of-type{border-top:0;padding-top:6px;}
-.finding h3{font-size:1.08rem;margin:.5rem 0 .5rem;}
-.finding p{font-size:.92rem;margin-bottom:0;}
+/* ---------- knob blocks (claim -> demonstration -> result) ---------- */
+.knob{border-top:1px solid var(--line);margin-top:38px;padding-top:34px;}
+.knob:first-of-type{border-top:0;margin-top:8px;padding-top:0;}
+.knob-head{display:flex;align-items:baseline;gap:.75rem;margin-bottom:.55rem;}
+.knob-num{font-family:var(--mono);font-size:.8rem;font-weight:700;color:var(--muted);letter-spacing:.02em;}
+.knob-head h3{font-size:1.18rem;}
+.knob-lead{max-width:790px;}
+.knob-lead p{font-size:.95rem;margin-bottom:.5rem;}
+.knob-demo{margin-top:20px;}
 .demo-note{font-size:.8rem;color:var(--muted);margin-top:.7rem;line-height:1.55;}
 .demo-note b{color:var(--ink);}
 
@@ -221,7 +222,7 @@ figure.plain img{border:0;border-radius:0;}
 
 /* ---------- charts ---------- */
 .chartbox{background:#fff;border:1px solid var(--line);border-radius:12px;padding:1.5rem 1.6rem 1.3rem;}
-.knob-chart{margin:4px 0 30px;}
+.knob-chart{margin-top:20px;}
 .chart{display:block;width:100%;min-width:600px;height:auto;}
 .chart text{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;}
 .chart .sh{font-size:14.5px;font-weight:660;fill:var(--ink);letter-spacing:-.01em;}
@@ -233,6 +234,7 @@ figure.plain img{border:0;border-radius:0;}
 .chart .sa{font-size:12px;font-weight:560;fill:var(--body);}
 .chart .sv{font-size:10.5px;font-weight:640;}
 .chart .sv2{font-size:11.5px;font-weight:680;}
+.chart .sv3{font-size:10px;font-weight:660;}
 .chart .sn{font-size:11.5px;font-weight:580;}
 .chart .sp{font-size:12px;font-weight:660;fill:var(--ink);}
 
@@ -380,7 +382,6 @@ footer li{margin-bottom:.3rem;}
   .g3{grid-template-columns:1fr;}
   .g2{grid-template-columns:1fr;}
   .split{grid-template-columns:1fr;gap:28px;}
-  .finding{grid-template-columns:1fr;gap:22px;padding:26px 0;}
   .tryside{grid-template-columns:1fr;}
   .foot-grid{grid-template-columns:1fr;}
   .qual figure img{max-height:none;width:100%;}
