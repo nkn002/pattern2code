@@ -181,6 +181,33 @@ figure.plain img{border:0;border-radius:0;}
 .pill.bias{background:#fdeaea;color:var(--bad);border-color:#f4cfcf;}
 .pill.other{background:#f1f2f6;color:#5a5f6b;border-color:var(--line);}
 
+/* ---------- charts ---------- */
+.chartbox{background:#fff;border:1px solid var(--line);border-radius:12px;padding:1.5rem 1.6rem 1.3rem;}
+.chart{display:block;width:100%;min-width:600px;height:auto;}
+.chart text{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;}
+.chart .sh{font-size:14.5px;font-weight:660;fill:var(--ink);letter-spacing:-.01em;}
+.chart .sg{font-size:10px;font-weight:680;letter-spacing:.11em;fill:var(--muted);}
+.chart .sm{font-size:13px;font-weight:600;fill:var(--ink);}
+.chart .sm.b{font-weight:730;}
+.chart .sf{font-family:var(--mono);font-size:9.5px;font-weight:600;letter-spacing:.02em;}
+.chart .sl{font-size:11.5px;fill:var(--muted);}
+.chart .sa{font-size:12px;font-weight:560;fill:var(--body);}
+.chart .sv{font-size:10.5px;font-weight:640;}
+.chart .sv2{font-size:11.5px;font-weight:680;}
+.chart .sn{font-size:11.5px;font-weight:580;}
+.chart .sp{font-size:12px;font-weight:660;fill:var(--ink);}
+
+details.data{margin-top:1.1rem;border-top:1px solid var(--line-soft);padding-top:.9rem;}
+details.data summary{
+  cursor:pointer;font-size:.83rem;color:var(--muted);font-weight:560;
+  list-style:none;display:inline-flex;align-items:center;gap:.4em;
+}
+details.data summary::-webkit-details-marker{display:none;}
+details.data summary::before{content:"▸";font-size:.8em;transition:transform .15s;display:inline-block;}
+details.data[open] summary::before{transform:rotate(90deg);}
+details.data summary:hover{color:var(--ink);}
+details.data .tscroll{margin-top:.9rem;}
+
 /* ---------- tables ---------- */
 .tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
 table{border-collapse:collapse;width:100%;font-size:.9rem;background:#fff;}
