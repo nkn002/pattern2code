@@ -24,6 +24,7 @@
       panels.forEach(function (p) {
         p.classList.toggle('on', p.getAttribute('data-panel') === idx);
       });
+      focusMask(document.querySelector('.panel.on'));
     });
   });
 
@@ -45,15 +46,45 @@
     });
   });
 
-  /* ---- copy buttons ---- */
+  /* ---- size each snippet pane to the screenshot beside it, then open it
+          at the masked value rather than at the top of the file ---- */
+  function focusMask(panel) {
+    if (!panel) return;
+    var pre = panel.querySelector('.snip');
+    var browser = panel.querySelector('.browser');
+    if (pre && browser && browser.offsetHeight > 0) {
+      // line the snippet's bottom edge up with the screenshot's bottom edge
+      var pr = pre.getBoundingClientRect(), br = browser.getBoundingClientRect();
+      pre.style.maxHeight = Math.max(190, Math.round(br.bottom - pr.top)) + 'px';
+    }
+    var mask = pre && pre.querySelector('.mask');
+    if (!mask) return;
+    // rect-based: <pre> is not a positioned ancestor, so offsetTop would not be relative to it
+    var delta = mask.getBoundingClientRect().top - pre.getBoundingClientRect().top;
+    pre.scrollTop = Math.max(0, pre.scrollTop + delta - pre.clientHeight / 2 + mask.offsetHeight / 2);
+  }
+  document.querySelectorAll('.panel').forEach(focusMask);
+  window.addEventListener('resize', function () {
+    focusMask(document.querySelector('.panel.on'));
+  });
+
+  /* ---- copy buttons ----
+     data-copy may list several selectors; they are copied in the order written,
+     not in document order, so "prompt then snippet" stays in that order. */
   document.querySelectorAll('.copy').forEach(function (btn) {
-    var target = document.querySelector(btn.getAttribute('data-copy'));
+    var targets = btn.getAttribute('data-copy').split(',')
+      .map(function (sel) { return document.querySelector(sel.trim()); })
+      .filter(Boolean);
     var label = btn.querySelector('span');
-    if (!target || !label) return;
+    if (!targets.length || !label) return;
+    var original = label.textContent;
     btn.addEventListener('click', function () {
-      navigator.clipboard.writeText(target.innerText).then(function () {
+      var text = targets.map(function (el) {
+        return el.innerText.trim();
+      }).join('\n\n');
+      navigator.clipboard.writeText(text).then(function () {
         label.textContent = 'Copied';
-        setTimeout(function () { label.textContent = 'Copy'; }, 1600);
+        setTimeout(function () { label.textContent = original; }, 1600);
       });
     });
   });
